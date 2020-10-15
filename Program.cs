@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using VisualSorting.Sorting;
 
 namespace VisualSorting
@@ -10,13 +8,19 @@ namespace VisualSorting
 	{
 		static void Main(string[] args)
 		{
-			CheckForArgs(args);
-			Console.SetWindowSize(135, 20);
-			Console.WriteLine();
-			int[] array = ArrayGenerator.GetArray();
+			int elementWidth = 6;
+			int operationTime = 100;
+			int[] array = ArrayGenerator.GetArray(elementWidth);	
+
+			ConsoleVisualizer visualizer = new ConsoleVisualizer(array, elementWidth, operationTime);
+
+			VisualIntSort iSort = GetSortImplementation();
+
 			AskForStart(array);
 
-			VisualBubbleSorting.Sort(array);
+			iSort.VisualSort(array, visualizer);
+
+			Thread.Sleep(60_000);
 		}
 
 		private static void AskForStart(int[] array)
@@ -27,24 +31,23 @@ namespace VisualSorting
 			Console.Read();
 		}
 
-		private static void CheckForArgs(string[] args)
+		private static VisualIntSort GetSortImplementation()
 		{
-			foreach (string arg in args)
-			{
-				if (arg.Contains("-it"))
-				{
-					try
-					{
-						int iterTime = int.Parse(arg.Split("=")[1].Trim());
-						VisualBubbleSorting.IterationTime = iterTime;
-					}
-					catch (Exception e)
-					{
-						Console.WriteLine("Wrong argument value." + arg);
-					}
-				}
-			}
+			Console.Clear();
 
+			Console.WriteLine("Please select sort implementation: ");
+			Console.WriteLine("1: Bubble sort algorithm.");
+			Console.WriteLine("2: Quick sort algorithm.");
+
+			int choice = Util.GetNextInt(1, 2);
+
+			switch (choice)
+			{
+				case 2:
+					return new QuickSort();
+				default:
+					return new BubbleSort();
+			}
 		}
 
 	}

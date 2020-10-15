@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 
 namespace VisualSorting
 {
@@ -7,12 +7,18 @@ namespace VisualSorting
 	{
 		private ArrayGenerator() { }
 
-		private const int MIN_NUMBER = -9_999;
-		private const int MAX_NUMBER = 99_999;
 		private const int MAX_ARRAY_SIZE = 1000;
 
-		public static int[] GetArray()
+		private static int minNumber = 0;
+		private static int maxNumber = 0;
+
+		public static int[] GetArray(int elementWidth)
 		{
+			KeyValuePair<int, int> range = GetRangeByLength(elementWidth);
+
+			ArrayGenerator.minNumber = range.Key;
+			ArrayGenerator.maxNumber = range.Value;
+
 			if (IsManuallyGenerationType())
 			{
 				return GetManuallyIntArray(RequestArraySize());
@@ -26,7 +32,7 @@ namespace VisualSorting
 		private static int RequestArraySize()
 		{
 			Console.Write("Please enter array size: ");
-			return GetNextInt(2, MAX_ARRAY_SIZE);
+			return Util.GetNextInt(2, MAX_ARRAY_SIZE);
 		}
 
 		private static bool IsManuallyGenerationType()
@@ -59,45 +65,18 @@ namespace VisualSorting
 					(arraySize - i),
 					(i == 0 ? " " : " more "),
 					string.Join(", ", array));
-				/* Restrict max number length to 5 */
-				array[i] = GetNextInt(MIN_NUMBER, MAX_NUMBER);
+				array[i] = Util.GetNextInt(minNumber, maxNumber);
 			}
 
 			return array;
 		}
 
-		private static int GetNextInt(int min, int max)
+		private static KeyValuePair<int, int> GetRangeByLength(int elementLength)
 		{
-			try
-			{
-				int number = int.Parse(Console.ReadLine());
-				if (number < min || number > max)
-				{
-					Console.WriteLine(" - Please enter number between range {0} and {1}", min, max);
-					return GetNextInt(min, max);
-				}
-				else
-				{
-					return number;
-				}
-			}
-			catch (Exception e)
-			{
-				if (e is FormatException)
-				{
-					Console.WriteLine(" - Is not a number!");
-				}
-				else if (e is OverflowException)
-				{
-					Console.WriteLine(" - Please enter value in range between {0} and {1}", int.MinValue, int.MaxValue);
-				}
-				else
-				{
-					Console.WriteLine(" - Oops!");
-				}
+			int max = int.Parse(new String('9', elementLength - 1));
+			int min = -(max / 10);
 
-				return GetNextInt(min, max);
-			}
+			return KeyValuePair.Create(min, max);
 		}
 
 		private static int[] RandomIntArray(int arraySize)
@@ -107,7 +86,7 @@ namespace VisualSorting
 
 			for (int i = 0; i < arraySize; i++)
 			{
-				array[i] = rand.Next(MIN_NUMBER, MAX_NUMBER);
+				array[i] = rand.Next(minNumber, maxNumber);
 			}
 
 			return array;
